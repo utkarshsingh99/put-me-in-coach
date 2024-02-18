@@ -70,7 +70,7 @@ try:
         # print("Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu1.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu2.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu3.acceleration))
         print(mpu1.acceleration, mpu2.acceleration, mpu3.acceleration,)
         data.append([time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro))
-
+        #0, 1 2 3, 4 5 6, 7 8 9, 10 11 12, 13 14 15, 16 17 18
         # print("Gyroscope data:", gyroscope_data)
         # print("Temp:", temperature)
 except KeyboardInterrupt:
