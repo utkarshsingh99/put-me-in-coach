@@ -51,7 +51,11 @@ def update(degrees):
     new_point3 = new_point2 + np.array([np.cos(angle3), np.sin(angle3)]) * 0.2
     line3.set_data([new_point2[0], new_point3[0]], [new_point2[1], new_point3[1]])
 
-
+    print(fixed_point)
+    print(new_point1)
+    print(new_point2)
+    print(new_point3)
+    print()
     return line1, line2, line3
 
 def calculate_angle(x, z):
