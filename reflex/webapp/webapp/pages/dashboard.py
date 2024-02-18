@@ -33,6 +33,21 @@ style={
 #     )
 #     session.commit()
 
+result = '0'
+with open('/Users/utkarshsingh/Desktop/Projects/put-me-in-coach/ml_results.txt') as f:
+    result = f.read()
+    print(result)
+
+result_dict = {
+    '0': 'Good shot!',
+    '1': 'Good form!',
+    '2': 'Forearm was too flat, you need to make sure your forearm has an approximate 90-degree perpendicular direction to your big arm',
+    '3': "Push shot. Your release point is rght in front of your chest, and you're releasing the ball from pushing. \
+    Suggestions: you should 1). move up your release point form your chest to your head; 2). use your wrist to spin the ball instead of pushing forward.",
+    '4': 'Bad weightlifting, too forward',
+        '5': 'Bad weightlifting, too backward',
+            '6': 'Bad weightlifting, too outward',
+}
 
 @template(route="/dashboard", title="Visualize your form")
 def dashboard() -> rx.Component:
@@ -60,7 +75,9 @@ def dashboard() -> rx.Component:
                     "<img src='/scatter1.gif' />"
                 )
             )
-        )
+        ),
+        rx.badge("Machine Learning based feedback"),
+        rx.text(result_dict[result])
         # rx.box(
         #     # rx.html("<div id=\"canvas\">Hello World</div>"),
         #     rx.text('Hey! Look at me'),

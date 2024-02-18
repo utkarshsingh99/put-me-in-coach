@@ -29,7 +29,6 @@ for i in range(12):
     timestamps.append(datetime.strftime(t, '%H:%M'))
     t = t + timedelta(minutes=5)
 
-print(timestamps)
 
 def prep_chart_data():
     json_file_path =  os.getcwd() + '/assets/activity_data.json'
