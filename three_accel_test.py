@@ -7,9 +7,9 @@ import time as timesleep
 from time import time
 
 import numpy as np
-from scipy.spatial.distance import euclidean
 from fastdtw import fastdtw
 from sklearn.utils import shuffle
+
 
 def save_csv_with_unique_name(base_filename, data, directory="."):
     """
@@ -25,20 +25,15 @@ def save_csv_with_unique_name(base_filename, data, directory="."):
         directory += os.path.sep
 
     filename, file_extension = os.path.splitext(base_filename)
-    counter = 0  # Start with no number appended
     unique_filename = f"{directory}{filename}{file_extension}"
 
-    # Check if the file exists and update the filename until it's unique
-    while os.path.exists(unique_filename):
-        counter += 1
-        unique_filename = f"{directory}{filename}({counter}){file_extension}"
 
     # Save the data to the CSV file
     with open(unique_filename, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerows(data)
 
-    print(f"CSV file saved as {unique_filename}")
+    # print(f"CSV file saved as {unique_filename}")
     return unique_filename
 
 # Define a function to read the sensor data
@@ -55,6 +50,21 @@ def read_sensor_data(mpu):
 
     return accelerometer_data, gyroscope_data, temperature
 
+# Compute DTW distances
+def NNDTW(test_point):
+    dtw_distances = []
+    #print(test_point)
+    for train_point in train_data:
+        dtw_distance, _ = fastdtw(test_point, train_point)
+        dtw_distances.append(dtw_distance)
+
+    # 1-Nearest Neighbors classification to classify our given test point relative to training points.
+    nearestidx = np.argmin(dtw_distances)
+    nearestneighbor = train_labels[nearestidx]
+
+    # print(nearestidx)
+    return nearestneighbor
+
 # Create I2C bus as normal
 i2c = board.I2C()  # uses board.SCL and board.SDA
 # i2c = board.STEMMA_I2C()  # For using the built-in STEMMA QT connector on a microcontroller
@@ -66,22 +76,25 @@ mpu1 = adafruit_mpu6050.MPU6050(tca[2])
 mpu2 = adafruit_mpu6050.MPU6050(tca[3])
 mpu3 = adafruit_mpu6050.MPU6050(tca[4])
 
-data = []
 clfdict = {}
 train_data = []
 train_labels = []
+good_idx = 0
+#aggregate training samples for good data
+for subdir in os.listdir():
+    if ('good') in subdir:
+        for file in os.listdir(subdir):
+            with open(os.path.join(subdir,file),"r") as f:
+                point = []
+                for line in f:
+                    point.append([float(x) for x in line.split(',')[1:]])
+                train_data.append(point)
+                train_labels.append(0)
+        clfdict[good_idx] = subdir
+        good_idx = good_idx + 1
 
 
-for file in os.listdir('good_data'):
-    with open(os.path.join('good_data',file),"r") as f:
-        point = []
-        for line in f:
-            point.append([float(x) for x in line.split(',')[1:]])
-        train_data.append(point)
-        train_labels.append(0)
-clfdict.update({0:'good'})
-
-badidx = 1
+badidx = good_idx + 1
 
 #aggregate training samples for any number of "bad form" classes, and assign a corresponding class label
 for subdir in os.listdir():
@@ -94,34 +107,67 @@ for subdir in os.listdir():
                 train_data.append(point)
                 train_labels.append(badidx)
 
-        clfdict.update({badidx:subdir})
+        clfdict[badidx] = subdir
         badidx = badidx + 1
 
-train_data, train_labels = shuffle
 
-try:
-    count = 0
-    while :
-        # Print the sensor dat
-        # print("Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu1.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu2.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu3.acceleration))
-        # print(mpu1.acceleration, mpu2.acceleration, mpu3.acceleration,)
-        data.append([time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro))
-        #0, 1 2 3, 4 5 6, 7 8 9, 10 11 12, 13 14 15, 16 17 18
-        # print("Gyroscope data:", gyroscope_data)
-        # print("Temp:", temperature)
-        count += 1
-except KeyboardInterrupt:
-    # This block is executed when a keyboard interrupt (Ctrl+C) is caught
-    print("Keyboard interrupt received. Exiting the program.")
 
-    # Place your cleanup code here
-    # For example, close files or release resources
-    print("Performing cleanup operations...")
+data = np.array([time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro))
+std_values_num = 20
+off_tick = 0
+flip_off = False
+flip_on = False
+flip_off_count = 0
+idx_start = 0
+idx_end = 0
+flags = []
+ticks = []
 
-finally:
-    # This block is executed no matter how the try block exits
-    print(len(data))
-    save_csv_with_unique_name("accel_data.csv", data)
-    print("Program has been terminated.")
+not_stopped = True
 
+idx = 0
+while not_stopped:
+    new_row = [time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro)
+    data = np.vstack([data, new_row])
+    #0, 1 2 3, 4 5 6, 7 8 9, 10 11 12, 13 14 15, 16 17 18
+    # print(max(0, idx-std_values_num):idx)
+    std_dev_last_10 = np.std(data[max(0, idx-std_values_num):idx,15])
+    if std_dev_last_10 > 2:
+        off_tick = min(off_tick + 1, 10)
+    else:
+        off_tick = 0
+
+    if off_tick > 6:
+        flags.append(10)
+        flip_on = True
+        if idx_start == 0:
+            idx_start = max(0, idx - 40)
+            print("Started")
+    else:
+
+        if flip_on:
+            flip_off = True
+        flags.append(0)
+
+    if flip_off:
+        flip_off_count += 1
+    else:
+        flip_off_count = 0
+
+    if flip_off_count > 40:
+        idx_end = idx
+        print("End")
+
+        break
+
+    ticks.append(off_tick)
+    idx += 1
+
+cut_data = data[idx_start:idx_end,:]
+#
+# print("Data:", len(data), idx_start, idx_end, cut_data.shape)
+# print("CLF:", clfdict)
+print(NNDTW(cut_data[:,1:]))
+unique_name = save_csv_with_unique_name("accel_data.csv", data)
+# print(unique_name)
 
