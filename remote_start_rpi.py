@@ -21,6 +21,11 @@ def ssh_execute_command(hostname, port, username, password, command):
             print(i)
         if error:
             print("Error:", error)
+
+        f = open("results.txt", "w")
+        f.write(output.splitlines()[-1])
+        f.close()
+
     except Exception as e:
         print("Connection Failed:", str(e))
     finally:
@@ -32,7 +37,7 @@ hostname = 'raspberrypi'
 port = 22  # default SSH port
 username = 'pi'
 password = 'pi'
-command = 'source ~/put-me-in-coach-venv/bin/activate && cd ~/put-me-in-coach &&python ./three_accel_test.py'  # Example command
+command = 'source ~/put-me-in-coach-venv/bin/activate && cd ~/put-me-in-coach && python ./three_accel_test.py'  # Example command
 
 ssh_execute_command(hostname, port, username, password, command)
 
@@ -50,3 +55,4 @@ result = subprocess.run(scp_command, shell=True, check=True, stdout=subprocess.P
 
 print("File copied successfully.")
 print(result.stdout.decode())
+
