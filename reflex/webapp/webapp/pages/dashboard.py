@@ -42,8 +42,8 @@ def dashboard() -> rx.Component:
         The UI for the dashboard page.
     """
     return rx.chakra.vstack(
-        rx.chakra.heading("Dashboard", font_size="3em"),
-        rx.chakra.text("This will be the place for Spatial Visualization!"),
+        rx.chakra.heading("Form Analysis", font_size="3em"),
+        rx.chakra.text("Based on our wearable sleeve, here's how your form compares to the pros!"),
         # rx.chakra.text(
         #     "You can edit this page in ",
         #     rx.chakra.code("{your_app}/pages/dashboard.py"),

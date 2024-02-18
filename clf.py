@@ -22,19 +22,22 @@ Ex: for some current labels.
 clfdict = {}
 train_data = []
 train_labels = []
-
+good_idx = 0
 #aggregate training samples for good data
-for file in os.listdir('good_data'):
-    with open(os.path.join('good_data',file),"r") as f:
-        point = []
-        for line in f:
-            point.append([float(x) for x in line.split(',')[1:]])
-        train_data.append(point)
-        train_labels.append(0)
-clfdict.update({0:'good'})
+for subdir in os.listdir():
+    if ('good') in subdir:
+        for file in os.listdir(subdir):
+            with open(os.path.join(subdir,file),"r") as f:
+                point = []
+                for line in f:
+                    point.append([float(x) for x in line.split(',')[1:]])
+                train_data.append(point)
+                train_labels.append(0)
+        clfdict.update({good_idx:subdir})
+        good_idx = good_idx + 1
 
 
-badidx = 1
+badidx = good_idx + 1
 
 #aggregate training samples for any number of "bad form" classes, and assign a corresponding class label
 for subdir in os.listdir():
@@ -52,7 +55,7 @@ for subdir in os.listdir():
 
 
 
-test_split = 6
+test_split = int(len(train_data)*0.25)
 
 train_data, train_labels = shuffle(train_data, train_labels)
 test_data = train_data[:test_split]
@@ -91,7 +94,7 @@ for idx, pt in enumerate(test_data):
     if pred == test_labels[idx]:
         passes += 1
     else:
-        print(f"FAIL: {pt}, prediction: {pred}, actual{test_labels[idx]}")
+        print(f"FAIL, prediction: {pred}, actual{test_labels[idx]}")
 print(f"passes: {100*passes/num_test}%, tests run: {num_test}")
 print(f"Time: {time.time() - start_time}")
 
