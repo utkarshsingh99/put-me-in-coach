@@ -5,7 +5,7 @@ import matplotlib.animation as animation
 import statistics
 from scipy.spatial.transform import Rotation as R
 
-data = np.loadtxt(r"good_data/accel_data(3).csv", delimiter=",")
+data = np.loadtxt(r"C:\Users\achen\Dropbox\code\treehacks10\put-me-in-coach\good_data\accel_data(12).csv", delimiter=",")
 
 time = data[:,0]
 # data[:,1:]*=-1
@@ -138,7 +138,7 @@ for i in range(len(time)-1):
     degree_rotated_bicep = (data[i,17]  * time_curr) * 180 / np.pi
     degree_bicep += degree_rotated_bicep
 
-    degree_rotated_forearm = (data[i,5]  * time_curr) * 180 / np.pi
+    degree_rotated_forearm = (data[i,5]  * time_curr) * 180 / np.pi + 0.5*(data[i,4]  * time_curr) * 180 / np.pi
     degree_forearm += degree_rotated_forearm
 
     degree_rotated_hand = (-data[i,11]  * time_curr) * 180 / np.pi
@@ -174,39 +174,3 @@ ani.save('scatter.gif', writer=writer)
 print("done")
 # plt.show()
 
-
-
-# ani.save('line_rotation_faster.mp4', writer='ffmpeg', fps=fps)
-
-# print(time)
-# plt.figure(figsize=(20,12))
-# plt.plot(time, data[:,1], label = "x")
-# plt.plot(time, data[:,2], label = "y")
-# plt.plot(time, data[:,3], label = "z")
-# plt.legend()
-
-# plt.show()
-# plt.figure(figsize=(20,12))
-
-# plt.plot(time, data[:,4], label = "x")
-# plt.plot(time, data[:,5], label = "y")
-# plt.plot(time, data[:,6], label = "z")
-# plt.legend()
-
-# plt.show()
-
-# plt.figure(figsize=(20,12))
-# plt.plot(time, data[:,7], label = "x")
-# plt.plot(time, data[:,8], label = "y")
-# plt.plot(time, data[:,9], label = "z")
-# plt.legend()
-
-# plt.show()
-# plt.figure(figsize=(20,12))
-
-# plt.plot(time, data[:,10], label = "x")
-# plt.plot(time, data[:,11], label = "y")
-# plt.plot(time, data[:,12], label = "z")
-# plt.legend()
-
-# plt.show()

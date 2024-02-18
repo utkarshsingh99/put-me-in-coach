@@ -4,20 +4,34 @@ from pydantic import BaseModel
 from fastapi import Request
 import reflex as rx
 
-@template(route="/terra", title="Get data from Fitness Apps")
+@template(route="/terra", title="Import other wearables")
 def terra() -> rx.Component:
     """The terra page.
 
     Returns:
         The UI for the terra page.
     """
+    class State(rx.State):
+    """The app state."""
+        yield
+        auth_resp = terra.generate_authentication_url(
+            	resource="GARMIN",auth_success_redirect_url="/terra"
+            ).get_parsed_response()
+        rx.redirect(auth_resp['auth_url'])
+
+        def terraLogin(self):
+            """Login to Terra."""
+            
+                
     return rx.chakra.vstack(
-        rx.chakra.heading("Fitness App", font_size="3em"),
-        rx.chakra.text("Look at data sourced from other fitness apps of the user"),
+        rx.chakra.heading("Wearable Data Integrations", font_size="3em"),
+        rx.chakra.text("Load in activity data from your favorite wearables!"),
+        rx.button("Connect with Terra to Garmin", on_click=State.terraLogin, width="25em"),
         rx.chakra.text(
             "You can edit this page in ",
             rx.chakra.code("{your_app}/pages/terra.py"),
         ),
+        
     )
 
 
