@@ -1,6 +1,7 @@
 """The dashboard page."""
 from webapp.templates import template
 
+import os
 import reflex as rx
 from reflex import html
 
@@ -12,25 +13,25 @@ style={
     }
 }
 
-config = rx.Config(
-    app_name="reflexwebapp",
-    db_url="mysql://root:fractal@localhost/treehacks",
-)
+# config = rx.Config(
+#     app_name="reflexwebapp",
+#     db_url="mysql://root:fractal@localhost/treehacks",
+# )
 
-class Users(rx.Model, table=True):
-    username: str
-    email: str
-    password: str
+# class Users(rx.Model, table=True):
+#     username: str
+#     email: str
+#     password: str
 
-with rx.session() as session:
-    session.add(
-        Users(
-            username="test",
-            email="admin@pynecone.io",
-            password="admin",
-        )
-    )
-    session.commit()
+# with rx.session() as session:
+#     session.add(
+#         Users(
+#             username="test",
+#             email="admin@pynecone.io",
+#             password="admin",
+#         )
+#     )
+#     session.commit()
 
 
 @template(route="/dashboard", title="Visualize your form")
@@ -47,13 +48,26 @@ def dashboard() -> rx.Component:
         #     "You can edit this page in ",
         #     rx.chakra.code("{your_app}/pages/dashboard.py"),
         # ),
-        rx.box(
-            # rx.html("<div id=\"canvas\">Hello World</div>"),
-            rx.text('Hey! Look at me'),
-            id="canvas_id_123",
-            width='700px',
-            height='500px',
-            backgroundColor="black",
-            color="red"),
-        rx.script(src="/main.js", custom_attrs={"type": "module"})
+        rx.hstack(
+            rx.box(
+                rx.text('Reference shot'),
+                rx.html(
+                    "<img src='/scatter.gif' />"),
+                ),
+            rx.box(
+                rx.text('Your shot'),
+                rx.html(
+                    "<img src='/scatter1.gif' />"
+                )
+            )
+        )
+        # rx.box(
+        #     # rx.html("<div id=\"canvas\">Hello World</div>"),
+        #     rx.text('Hey! Look at me'),
+        #     id="canvas_id_123",
+        #     width='700px',
+        #     height='500px',
+        #     backgroundColor="black",
+        #     color="red"),
+        # rx.script(src="/main.js", custom_attrs={"type": "module"})
     )
