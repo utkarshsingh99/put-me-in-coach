@@ -93,7 +93,6 @@ data = []
 
 try:
 	# Publish message to MQTT Topic
-	count = 1
 	while True:
 		send_list = [time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro)
 		send_list = [str(value) for value in send_list]

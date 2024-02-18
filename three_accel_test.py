@@ -6,6 +6,11 @@ import adafruit_mpu6050
 import time as timesleep
 from time import time
 
+import numpy as np
+from scipy.spatial.distance import euclidean
+from fastdtw import fastdtw
+from sklearn.utils import shuffle
+
 def save_csv_with_unique_name(base_filename, data, directory="."):
     """
     Saves data to a CSV file, appending a number to the filename if it already exists.
@@ -62,16 +67,49 @@ mpu2 = adafruit_mpu6050.MPU6050(tca[3])
 mpu3 = adafruit_mpu6050.MPU6050(tca[4])
 
 data = []
+clfdict = {}
+train_data = []
+train_labels = []
+
+
+for file in os.listdir('good_data'):
+    with open(os.path.join('good_data',file),"r") as f:
+        point = []
+        for line in f:
+            point.append([float(x) for x in line.split(',')[1:]])
+        train_data.append(point)
+        train_labels.append(0)
+clfdict.update({0:'good'})
+
+badidx = 1
+
+#aggregate training samples for any number of "bad form" classes, and assign a corresponding class label
+for subdir in os.listdir():
+    if ('(bad)') in subdir:
+        for file in os.listdir(subdir):
+            with open(os.path.join(subdir,file),"r") as f:
+                point = []
+                for line in f:
+                    point.append([float(x) for x in line.split(',')[1:]])
+                train_data.append(point)
+                train_labels.append(badidx)
+
+        clfdict.update({badidx:subdir})
+        badidx = badidx + 1
+
+train_data, train_labels = shuffle
 
 try:
-    while True:
+    count = 0
+    while :
         # Print the sensor dat
         # print("Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu1.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu2.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu3.acceleration))
-        print(mpu1.acceleration, mpu2.acceleration, mpu3.acceleration,)
+        # print(mpu1.acceleration, mpu2.acceleration, mpu3.acceleration,)
         data.append([time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro))
         #0, 1 2 3, 4 5 6, 7 8 9, 10 11 12, 13 14 15, 16 17 18
         # print("Gyroscope data:", gyroscope_data)
         # print("Temp:", temperature)
+        count += 1
 except KeyboardInterrupt:
     # This block is executed when a keyboard interrupt (Ctrl+C) is caught
     print("Keyboard interrupt received. Exiting the program.")
@@ -79,9 +117,11 @@ except KeyboardInterrupt:
     # Place your cleanup code here
     # For example, close files or release resources
     print("Performing cleanup operations...")
-    save_csv_with_unique_name("accel_data.csv", data)
-
 
 finally:
     # This block is executed no matter how the try block exits
+    print(len(data))
+    save_csv_with_unique_name("accel_data.csv", data)
     print("Program has been terminated.")
+
+
