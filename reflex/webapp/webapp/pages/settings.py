@@ -5,7 +5,7 @@ from webapp.templates import template
 import reflex as rx
 
 
-@template(route="/settings", title="Video Feedback")
+@template(route="/settings", title="Learning Materials")
 def settings() -> rx.Component:
     """The settings page.
 
