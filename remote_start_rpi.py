@@ -1,4 +1,6 @@
 import paramiko
+import subprocess
+
 
 def ssh_execute_command(hostname, port, username, password, command):
     # Initialize the SSH client
@@ -14,10 +16,11 @@ def ssh_execute_command(hostname, port, username, password, command):
         # Read the command output
         output = stdout.read().decode()
         error = stderr.read().decode()
+        print("Output:", output)
+        for i in output:
+            print(i)
         if error:
             print("Error:", error)
-        else:
-            print("Output:", output)
     except Exception as e:
         print("Connection Failed:", str(e))
     finally:
@@ -29,7 +32,21 @@ hostname = 'raspberrypi'
 port = 22  # default SSH port
 username = 'pi'
 password = 'pi'
-command = 'source ~/put-me-in-coach-venv/bin/activate && python ~/put-me-in-coach/three_accel_test.py'  # Example command
+command = 'source ~/put-me-in-coach-venv/bin/activate && cd ~/put-me-in-coach &&python ./three_accel_test.py'  # Example command
 
 ssh_execute_command(hostname, port, username, password, command)
 
+
+
+remote_user = "pi"  # Replace with the remote username
+remote_host = "raspberrypi"  # Replace with the remote host address or IP
+remote_file_path = "~/put-me-in-coach/accel_data.csv"  # The full path of the remote file to copy
+local_dir = "."  # The local directory to copy the file to, "." denotes the current directory
+
+# Construct the SCP command
+scp_command = f"scp {remote_user}@{remote_host}:{remote_file_path} {local_dir}"
+
+result = subprocess.run(scp_command, shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+print("File copied successfully.")
+print(result.stdout.decode())
