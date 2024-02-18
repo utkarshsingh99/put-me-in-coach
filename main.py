@@ -1,3 +1,5 @@
+# Import package
+
 import board
 import os
 import csv
@@ -5,6 +7,32 @@ import adafruit_tca9548a
 import adafruit_mpu6050
 import time as timesleep
 from time import time
+import paho.mqtt.client as mqtt
+
+# Define Variables
+MQTT_HOST = "192.168.137.183"
+MQTT_PORT = 1883
+MQTT_KEEPALIVE_INTERVAL = 5
+MQTT_TOPIC = "mqtt/rpi"
+
+# Define on_connect event Handler
+def on_connect(mosq, obj, rc):
+	print ("Connected to MQTT Broker")
+
+# Define on_publish event Handler
+def on_publish(client, userdata, mid):
+	print ("Message Published...")
+
+# Initiate MQTT Client
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
+
+# Register Event Handlers
+mqttc.on_publish = on_publish
+mqttc.on_connect = on_connect
+
+# Connect with MQTT Broker
+mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
+
 
 def save_csv_with_unique_name(base_filename, data, directory="."):
     """
@@ -64,24 +92,15 @@ mpu3 = adafruit_mpu6050.MPU6050(tca[4])
 data = []
 
 try:
-    while True:
-        # Print the sensor dat
-        # print("Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu1.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu2.acceleration), "Acceleration: X:%.2f, Y: %.2f, Z: %.2f m/s^2"%(mpu3.acceleration))
-        print(mpu1.acceleration, mpu2.acceleration, mpu3.acceleration,)
-        data.append([time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro))
-        #0, 1 2 3, 4 5 6, 7 8 9, 10 11 12, 13 14 15, 16 17 18
-        # print("Gyroscope data:", gyroscope_data)
-        # print("Temp:", temperature)
+	# Publish message to MQTT Topic
+	count = 1
+	while True:
+		send_list = [time()] + list(mpu1.acceleration) + list(mpu1.gyro) +list(mpu2.acceleration) + list(mpu2.gyro) +list(mpu3.acceleration) + list(mpu3.gyro)
+		send_list = [str(value) for value in send_list]
+		send_str = ",".join(send_list)
+		mqttc.publish(MQTT_TOPIC,send_str)
 except KeyboardInterrupt:
-    # This block is executed when a keyboard interrupt (Ctrl+C) is caught
-    print("Keyboard interrupt received. Exiting the program.")
+	# Disconnect from MQTT_Broker
+	mqttc.publish(MQTT_TOPIC,"ENDENDEND")
+	mqttc.disconnect()
 
-    # Place your cleanup code here
-    # For example, close files or release resources
-    print("Performing cleanup operations...")
-    save_csv_with_unique_name("accel_data.csv", data)
-
-
-finally:
-    # This block is executed no matter how the try block exits
-    print("Program has been terminated.")

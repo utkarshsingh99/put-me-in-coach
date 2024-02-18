@@ -17,7 +17,7 @@ def on_publish(client, userdata, mid):
 	print ("Message Published...")
 
 # Initiate MQTT Client
-mqttc = mqtt.Client()
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
 # Register Event Handlers
 mqttc.on_publish = on_publish
