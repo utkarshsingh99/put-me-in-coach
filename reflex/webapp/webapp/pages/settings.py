@@ -13,10 +13,19 @@ def settings() -> rx.Component:
         The UI for the settings page.
     """
     return rx.chakra.vstack(
-        rx.chakra.heading("Settings", font_size="3em"),
-        rx.chakra.text("Welcome to Reflex!"),
-        rx.chakra.text(
-            "You can edit this page in ",
-            rx.chakra.code("{your_app}/pages/settings.py"),
-        ),
+        rx.chakra.heading("Learning Materials", font_size="3em"),
+        rx.grid(
+            rx.foreach(
+                rx.Var.range(12),
+                # lambda i: rx.card(f"Card {i + 1}", height="10vh"),
+                lambda i: rx.html("""
+                    <iframe width="420" height="315"
+                        src="https://www.youtube.com/embed/pq4DdAqX3yg">
+                    </iframe>
+                """)
+            ),
+            columns="3",
+            spacing="4",
+            width="100%",
+        )
     )
