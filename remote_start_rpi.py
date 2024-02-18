@@ -17,7 +17,7 @@ def ssh_execute_command(hostname, port, username, password, command):
         output = stdout.read().decode()
         error = stderr.read().decode()
         print("Output:", output)
-        for i in output:
+        for i in output.splitlines():
             print(i)
         if error:
             print("Error:", error)
