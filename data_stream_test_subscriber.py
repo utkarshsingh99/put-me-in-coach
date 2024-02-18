@@ -1,26 +1,36 @@
+# Import package
 import paho.mqtt.client as mqtt
 
-# The callback for when the client receives a CONNACK response from the server.
-def on_connect(client, userdata, flags, rc):
-    print(f"Connected with result code {rc}")
+# Define Variables
+MQTT_HOST = "192.168.137.183"
+MQTT_PORT = 1883
+MQTT_KEEPALIVE_INTERVAL = 5
+MQTT_TOPIC = "mqtt/rpi"
+MQTT_MSG = "Hello MQTT"
 
-    # Subscribing in on_connect() means that if we lose the connection and
-    # reconnect then subscriptions will be renewed.
-    client.subscribe("mqtt/rpi")
+# Define on_connect event Handler
+def on_connect(mosq, obj, flags, rc):
+	#Subscribe to a the Topic
+	mqttc.subscribe(MQTT_TOPIC, 0)
 
-# The callback for when a PUBLISH message is received from the server.
-def on_message(client, userdata, msg):
-    print(f"Received message '{msg.payload.decode()}' on topic '{msg.topic}' with QoS {msg.qos}")
+# Define on_subscribe event Handler
+def on_subscribe(mosq, obj, mid, granted_qos):
+    print ("Subscribed to MQTT Topic")
 
-broker_address = "192.168.137.183"  # Replace with your MQTT broker's address
-port = 1883  # Default MQTT port (use 8883 for SSL connections)
+# Define on_message event Handler
+def on_message(mosq, obj, msg):
+	print (msg.payload.decode())
 
-client = mqtt.Client()  # Create new instance
-client.on_connect = on_connect
-client.on_message = on_message
+# Initiate MQTT Client
+mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-client.connect(broker_address, port, 60)  # Connect to the MQTT broker
+# Register Event Handlers
+mqttc.on_message = on_message
+mqttc.on_connect = on_connect
+mqttc.on_subscribe = on_subscribe
 
-# Blocking call that processes network traffic, dispatches callbacks, and
-# handles reconnecting.
-client.loop_forever()
+# Connect with MQTT Broker
+mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL )
+
+# Continue the network loop
+mqttc.loop_forever()
