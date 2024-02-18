@@ -6,13 +6,13 @@ def on_connect(client, userdata, flags, rc):
 
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("your/topic")
+    client.subscribe("mqtt/rpi")
 
 # The callback for when a PUBLISH message is received from the server.
 def on_message(client, userdata, msg):
     print(f"Received message '{msg.payload.decode()}' on topic '{msg.topic}' with QoS {msg.qos}")
 
-broker_address = "your.broker.address"  # Replace with your MQTT broker's address
+broker_address = "192.168.137.183"  # Replace with your MQTT broker's address
 port = 1883  # Default MQTT port (use 8883 for SSL connections)
 
 client = mqtt.Client()  # Create new instance

@@ -2,10 +2,10 @@
 import paho.mqtt.client as mqtt
 
 # Define Variables
-MQTT_HOST = "192.168.1.25"
+MQTT_HOST = "192.168.137.183"
 MQTT_PORT = 1883
 MQTT_KEEPALIVE_INTERVAL = 5
-MQTT_TOPIC = "hello/world"
+MQTT_TOPIC = "mqtt/rpi"
 MQTT_MSG = "Hello MQTT"
 
 # Define on_connect event Handler
@@ -26,8 +26,13 @@ mqttc.on_connect = on_connect
 # Connect with MQTT Broker
 mqttc.connect(MQTT_HOST, MQTT_PORT, MQTT_KEEPALIVE_INTERVAL)
 
-# Publish message to MQTT Topic
-mqttc.publish(MQTT_TOPIC,MQTT_MSG)
+try:
+	# Publish message to MQTT Topic
+	count = 1
+	while True:
+		mqttc.publish(MQTT_TOPIC,MQTT_MSG+str(count))
+		count += 1
+except KeyboardInterrupt:
+	# Disconnect from MQTT_Broker
+	mqttc.disconnect()
 
-# Disconnect from MQTT_Broker
-mqttc.disconnect()
