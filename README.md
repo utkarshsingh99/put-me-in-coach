@@ -1,5 +1,7 @@
 # Put me in, Coach!
 
+## Project developed at TreeHacks, a Hackathon by Stanford University!
+
 ![main image](https://d112y698adiu2z.cloudfront.net/photos/production/software_photos/002/776/157/datas/gallery.jpg)  
 [![Watch the video](https://img.youtube.com/vi/D2bPI29tvSQ/default.jpg)](https://youtu.be/D2bPI29tvSQ)  
 
